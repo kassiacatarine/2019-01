@@ -2,6 +2,7 @@ package br.edu.utfpr.dto;
 
 import lombok.Builder;
 import lombok.Data;
+
 import br.edu.utfpr.excecao.NomeClienteMenor5CaracteresException;
 
 @Data
@@ -20,5 +21,5 @@ public class ClienteDTO {
 
         this.nome = nome;
     }
-    
+
 }

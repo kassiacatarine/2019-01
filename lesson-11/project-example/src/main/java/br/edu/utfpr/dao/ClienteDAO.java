@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import br.edu.utfpr.dto.ClienteDTO;
 import br.edu.utfpr.dto.PaisDTO;
@@ -87,14 +89,40 @@ public class ClienteDAO {
         }
     }
 
-    public ClienteDTO find(String nome) {
+    public List<ClienteDTO> findByName(String nome) {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            log.info("Encontrando Cliente");
+            log.info("Encontrando Clientes por Nome");
             stmt = con.prepareStatement(
-                    "SELECT id, nome, telefone, idade, limiteCredito, id_pais FROM cliente WHERE name like concat('%', ?,'%')");
+                    "SELECT id, nome, telefone, idade, limiteCredito, id_pais FROM cliente WHERE name like concat('%', ?,'%') GROUP BY name");
             stmt.setString(1, nome);
+            rs = stmt.executeQuery();
+            List<ClienteDTO> clientes = new ArrayList<>();
+            while (rs.next()) {
+                ClienteDTO cliente = ClienteDTO.builder().id(rs.getInt(1)).nome(rs.getString(2))
+                        .telefone(rs.getString(3)).idade(rs.getInt(4)).limiteCredito(rs.getDouble(5))
+                        .pais(PaisDTO.builder().id(rs.getInt(6)).build()).build();
+
+                clientes.add(cliente);
+            }
+            return clientes;
+        } catch (SQLException ex) {
+            System.err.println("Erro ao encontrar: " + ex);
+            return null;
+        } finally {
+            ConnectionFactory.closeConnection(con, stmt, rs);
+        }
+    }
+
+    public ClienteDTO findById(int idCliente) {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            log.info("Encontrando Cliente por Id");
+            stmt = con.prepareStatement(
+                    "SELECT id, nome, telefone, idade, limiteCredito, id_pais FROM cliente WHERE id = ?");
+            stmt.setInt(1, idCliente);
             rs = stmt.executeQuery();
             ClienteDTO cliente;
             while (rs.next()) {
